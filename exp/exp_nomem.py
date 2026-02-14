@@ -43,7 +43,8 @@ class net(nn.Module):
         encoder = TSEncoder(input_dims=args.enc_in + 7,
                              output_dims=320,  # standard ts2vec backbone value
                              hidden_dims=64, # standard ts2vec backbone value
-                             depth=10) 
+                             depth=10,
+                             device=device)  # ✅ 传递device参数 
         self.encoder = TS2VecEncoderWrapper(encoder, mask='all_true').to(self.device)
         self.dim = args.c_out * args.pred_len
         
@@ -289,7 +290,11 @@ class Exp_TS2VecSupervised(Exp_Basic):
         return outputs, rearrange(batch_y, 'b t d -> b (t d)')
     
     def _ol_one_batch(self,dataset_object, batch_x, batch_y, batch_x_mark, batch_y_mark):
-        true = rearrange(batch_y, 'b t d -> b (t d)').float().to(self.device)
+        # 先切片batch_y到pred_len，再计算true
+        f_dim = -1 if self.args.features=='MS' else 0
+        batch_y_sliced = batch_y[:,-self.args.pred_len:,f_dim:]
+        true = rearrange(batch_y_sliced, 'b t d -> b (t d)').float().to(self.device)
+        
         criterion = self._select_criterion()
         
         x = torch.cat([batch_x.float(), batch_x_mark.float()], dim=-1).to(self.device)
@@ -307,7 +312,6 @@ class Exp_TS2VecSupervised(Exp_Basic):
             self.model.store_grad()
             self.opt.zero_grad()
 
-        f_dim = -1 if self.args.features=='MS' else 0
         batch_y = batch_y[:,-self.args.pred_len:,f_dim:].to(self.device)
         return outputs, rearrange(batch_y, 'b t d -> b (t d)')
 

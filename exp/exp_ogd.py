@@ -283,7 +283,11 @@ class Exp_TS2VecSupervised(Exp_Basic):
         return outputs, rearrange(batch_y, 'b t d -> b (t d)')
     
     def _ol_one_batch(self,dataset_object, batch_x, batch_y, batch_x_mark, batch_y_mark):
-        true = rearrange(batch_y, 'b t d -> b (t d)').float().to(self.device)
+        # 先切片batch_y到pred_len，再计算true
+        f_dim = -1 if self.args.features=='MS' else 0
+        batch_y_sliced = batch_y[:,-self.args.pred_len:,f_dim:]
+        true = rearrange(batch_y_sliced, 'b t d -> b (t d)').float().to(self.device)
+        
         criterion = self._select_criterion()
         
         x = torch.cat([batch_x.float(), batch_x_mark.float()], dim=-1).to(self.device)
@@ -301,7 +305,6 @@ class Exp_TS2VecSupervised(Exp_Basic):
             
             self.opt.zero_grad()
 
-        f_dim = -1 if self.args.features=='MS' else 0
         batch_y = batch_y[:,-self.args.pred_len:,f_dim:].to(self.device)
         return outputs, rearrange(batch_y, 'b t d -> b (t d)')
 

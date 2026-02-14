@@ -5,8 +5,7 @@
 
 import torch
 import numpy as np
-from typing import Tuple
-from torchvision import transforms
+from typing import Tuple, Optional, Callable
 
 
 def reservoir(num_seen_examples: int, buffer_size: int) -> int:
@@ -87,7 +86,7 @@ class Buffer:
                 if task_labels is not None:
                     self.task_labels[index] = task_labels[i].to(self.device)
 
-    def get_data(self, size: int, transform: transforms=None) -> Tuple:
+    def get_data(self, size: int, transform: Optional[Callable] = None) -> Tuple:
         """
         Random samples a batch of size items.
         :param size: the number of requested items
@@ -118,7 +117,7 @@ class Buffer:
         else:
             return False
 
-    def get_all_data(self, transform: transforms=None) -> Tuple:
+    def get_all_data(self, transform: Optional[Callable] = None) -> Tuple:
         """
         Return all the items in the memory buffer.
         :param transform: the transformation to be applied (data augmentation)

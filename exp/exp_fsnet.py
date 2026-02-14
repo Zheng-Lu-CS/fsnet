@@ -39,10 +39,16 @@ class net(nn.Module):
     def __init__(self, args, device):
         super().__init__()
         self.device = device
-        encoder = TSEncoder(input_dims=args.enc_in + 7,
+        # ✅ 修复维度不匹配问题：
+        # 数据特征：args.enc_in (1维 for 'S', 7维 for 'M')
+        # 时间特征：timeenc=2时有7维 (minute, hour, dayofweek, day, dayofyear, month, weekofyear)
+        # 总维度：enc_in + 7
+        # ✅ 传递device参数到TSEncoder
+        encoder = TSEncoder(input_dims=args.enc_in + 7,  # ✅ 固定为 +7
                              output_dims=320,  # standard ts2vec backbone value
                              hidden_dims=64, # standard ts2vec backbone value
-                             depth=10) 
+                             depth=10,
+                             device=device)  # 传递设备 
         self.encoder = TS2VecEncoderWrapper(encoder, mask='all_true').to(self.device)
         self.dim = args.c_out * args.pred_len
         
@@ -172,11 +178,27 @@ class Exp_TS2VecSupervised(Exp_Basic):
         for epoch in range(self.args.train_epochs):
             iter_count = 0
             train_loss = []
+            
+            # 🔍 添加第一个epoch第一个batch的维度检查
+            first_batch_checked = False
 
             self.model.train()
             epoch_time = time.time()
             for i, (batch_x, batch_y, batch_x_mark, batch_y_mark) in enumerate(train_loader):
                 iter_count += 1
+                
+                # Print first batch dimensions (only once to avoid clutter)
+                if epoch == 0 and not first_batch_checked:
+                    print(f'\n[Data Dimension Check - Epoch 1, Batch 1]')
+                    print(f'   batch_x shape: {batch_x.shape}')
+                    print(f'   batch_y shape: {batch_y.shape}')
+                    print(f'   batch_x_mark shape: {batch_x_mark.shape}')
+                    print(f'   batch_y_mark shape: {batch_y_mark.shape}')
+                    print(f'   Concatenated input dim: {batch_x.shape[-1] + batch_x_mark.shape[-1]}')
+                    print(f'   Model expected dim: {self.args.enc_in + 7} (enc_in={self.args.enc_in} + time_features=7)')
+                    print(f'   Model output dim: {self.model.dim} (c_out={self.args.c_out} * pred_len={self.args.pred_len})')
+                    print(f'   Expected true dim: {self.args.pred_len * self.args.c_out}\n')
+                    first_batch_checked = True
 
                 self.opt.zero_grad()
                 pred, true = self._process_one_batch(
@@ -203,10 +225,11 @@ class Exp_TS2VecSupervised(Exp_Basic):
             print("Epoch: {} cost time: {}".format(epoch + 1, time.time() - epoch_time))
             train_loss = np.average(train_loss)
             vali_loss = self.vali(vali_data, vali_loader, criterion)
-            #test_loss = self.vali(test_data, test_loader, criterion)
+            # NOTE: test_loss is set to 0 during training to save computation time
+            # The actual test metrics (MSE, MAE, etc.) will be computed after training completes
             test_loss = 0.
 
-            print("Epoch: {0}, Steps: {1} | Train Loss: {2:.7f} Vali Loss: {3:.7f} Test Loss: {4:.7f}".format(
+            print("Epoch: {0}, Steps: {1} | Train Loss: {2:.7f} Vali Loss: {3:.7f} Test Loss: {4:.7f} (not computed during training)".format(
                 epoch + 1, train_steps, train_loss, vali_loss, test_loss))
             early_stopping(vali_loss, self.model, path)
             if early_stopping.early_stop:
@@ -261,15 +284,21 @@ class Exp_TS2VecSupervised(Exp_Basic):
 
         preds = torch.cat(preds, dim=0).numpy()
         trues = torch.cat(trues, dim=0).numpy()
-        print('test shape:', preds.shape, trues.shape)
+        print('\n[Test Results]')
+        print(f'   Predictions shape: {preds.shape}')
+        print(f'   Ground truth shape: {trues.shape}')
         
         MAE, MSE, RMSE, MAPE, MSPE = cumavg(maes), cumavg(mses), cumavg(rmses), cumavg(mapes), cumavg(mspes)
         mae, mse, rmse, mape, mspe = MAE[-1], MSE[-1], RMSE[-1], MAPE[-1], MSPE[-1]
 
         end = time.time()
         exp_time = end - start
-        #mae, mse, rmse, mape, mspe = metric(preds, trues)
-        print('mse:{}, mae:{}, time:{}'.format(mse, mae, exp_time))
+        print(f'   MSE: {mse:.6f}')
+        print(f'   MAE: {mae:.6f}')
+        print(f'   RMSE: {rmse:.6f}')
+        print(f'   MAPE: {mape:.6f}')
+        print(f'   MSPE: {mspe:.6f}')
+        print(f'   Test time: {exp_time:.2f}s\n')
         return [mae, mse, rmse, mape, mspe, exp_time], MAE, MSE, preds, trues
 
     def _process_one_batch(self, dataset_object, batch_x, batch_y, batch_x_mark, batch_y_mark, mode='train'):
@@ -278,21 +307,51 @@ class Exp_TS2VecSupervised(Exp_Basic):
 
         x = torch.cat([batch_x.float(), batch_x_mark.float()], dim=-1).to(self.device)
         batch_y = batch_y.float()
+        
+        # Debug: print shapes on first call
+        if not hasattr(self, '_debug_printed'):
+            print(f'\n[_process_one_batch Debug]')
+            print(f'   batch_y original shape: {batch_y.shape}')
+            print(f'   args.pred_len: {self.args.pred_len}')
+            print(f'   args.features: {self.args.features}')
+            self._debug_printed = True
+        
         if self.args.use_amp:
             with torch.cuda.amp.autocast():
                 outputs = self.model(x)
         else:
             outputs = self.model(x)
+        
+        # Debug: print output shape
+        if not hasattr(self, '_debug_printed2'):
+            print(f'   outputs shape: {outputs.shape}')
+            self._debug_printed2 = True
+        
         f_dim = -1 if self.args.features=='MS' else 0
         batch_y = batch_y[:,-self.args.pred_len:,f_dim:].to(self.device)
+        
+        # Debug: print final shapes
+        if not hasattr(self, '_debug_printed3'):
+            print(f'   batch_y sliced shape: {batch_y.shape}')
+            print(f'   f_dim: {f_dim}')
+            true = rearrange(batch_y, 'b t d -> b (t d)')
+            print(f'   true (after rearrange) shape: {true.shape}')
+            print(f'   Expected match: outputs={outputs.shape} vs true={true.shape}\n')
+            self._debug_printed3 = True
+        
         return outputs, rearrange(batch_y, 'b t d -> b (t d)')
     
     def _ol_one_batch(self,dataset_object, batch_x, batch_y, batch_x_mark, batch_y_mark):
-        true = rearrange(batch_y, 'b t d -> b (t d)').float().to(self.device)
+        # ✅ 修复：先切片batch_y到pred_len，再rearrange
+        batch_y = batch_y.float()
+        f_dim = -1 if self.args.features=='MS' else 0
+        batch_y_sliced = batch_y[:,-self.args.pred_len:,f_dim:].to(self.device)  # [B, pred_len, D]
+        true = rearrange(batch_y_sliced, 'b t d -> b (t d)')  # [B, pred_len*D]
+        
         criterion = self._select_criterion()
         
         x = torch.cat([batch_x.float(), batch_x_mark.float()], dim=-1).to(self.device)
-        batch_y = batch_y.float()
+        
         for _ in range(self.n_inner):
             if self.args.use_amp:
                 with torch.cuda.amp.autocast():
@@ -306,7 +365,6 @@ class Exp_TS2VecSupervised(Exp_Basic):
             self.model.store_grad()
             self.opt.zero_grad()
 
-        f_dim = -1 if self.args.features=='MS' else 0
-        batch_y = batch_y[:,-self.args.pred_len:,f_dim:].to(self.device)
-        return outputs, rearrange(batch_y, 'b t d -> b (t d)')
+        # 返回最后一次的outputs和true（已经正确对齐）
+        return outputs, true
 

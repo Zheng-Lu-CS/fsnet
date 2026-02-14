@@ -32,17 +32,18 @@ def generate_binomial_mask(B, T, p=0.5):
     return torch.from_numpy(np.random.binomial(1, p, size=(B, T))).to(torch.bool)
 
 class TSEncoder(nn.Module):
-    def __init__(self, input_dims, output_dims, hidden_dims=64, depth=10, mask_mode='binomial', gamma=0.9):
+    def __init__(self, input_dims, output_dims, hidden_dims=64, depth=10, mask_mode='binomial', gamma=0.9, device=None):
         super().__init__()
         self.input_dims = input_dims
         self.output_dims = output_dims
         self.hidden_dims = hidden_dims
         self.mask_mode = mask_mode
+        self.device = device if device is not None else torch.device('cpu')  # 默认CPU
         self.input_fc = nn.Linear(input_dims, hidden_dims)
         self.feature_extractor = DilatedConvEncoder(
             hidden_dims,
             [hidden_dims] * depth + [output_dims],
-            kernel_size=3, gamma=gamma
+            kernel_size=3, gamma=gamma, device=self.device
         )
         self.repr_dropout = nn.Dropout(p=0.1)
 
@@ -52,8 +53,8 @@ class TSEncoder(nn.Module):
     def ctrl_params(self):
         return self.feature_extractor.ctrl_params()
 
-    def forward(self, x, mask=None):  # x: B x T x input_dims
-        nan_mask = ~x.isnan().any(axis=-1)
+    def forward(self, x:torch.Tensor, mask=None):  # x: B x T x input_dims
+        nan_mask = ~x.isnan().any(dim=-1)
         x[~nan_mask] = 0
         x = self.input_fc(x)  # B x T x Ch
         
@@ -88,6 +89,21 @@ class TSEncoder(nn.Module):
 
 
 class BandedFourierLayer(nn.Module):
+    """BandedFourierLayer 理解（当前阶段）
+
+输入输出：时域 [B,T,C_in] → [B,T,C_out]
+
+核心思想：FFT → 只处理某一频段 → iFFT
+
+每个 band 有独立参数
+
+freq_mixing=False 时：不同频率不互相混合
+
+freq_mixing=True 时：允许跨频率信息流
+
+当前任务中：作为特征增强模块使用，不是主干
+
+细节（einsum / complex）暂不展开，后续如需优化再读"""
 
     def __init__(self, in_channels, out_channels, band, num_bands, freq_mixing=False, bias=True, length=201):
         super().__init__()

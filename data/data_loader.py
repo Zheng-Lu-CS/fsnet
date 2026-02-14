@@ -59,6 +59,13 @@ class Dataset_ETT_hour(Dataset):
         if self.features=='M' or self.features=='MS':
             cols_data = df_raw.columns[1:]
             df_data = df_raw[cols_data]
+            print("AAAA")
+            try:
+                df_data = df_data.astype(float)
+            except ValueError as e:
+                print("存在无法转换为数字的字符，正在强制转换并剔除...")
+                # 强制转换，非数字变 NaN
+                df_data = df_data.apply(pd.to_numeric, errors='coerce').fillna(0.0)
         elif self.features=='S':
             df_data = df_raw[[self.target]]
 

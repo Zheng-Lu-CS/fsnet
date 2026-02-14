@@ -7,8 +7,9 @@ import pdb
 from itertools import chain
 
 class SamePadConv(nn.Module):
-    def __init__(self, in_channels, out_channels, kernel_size, dilation=1, groups=1, gamma=0.9):
+    def __init__(self, in_channels, out_channels, kernel_size, dilation=1, groups=1, gamma=0.9, device=None):
         super().__init__()
+        self.device = device if device is not None else torch.device('cpu')  # ✅ 添加设备管理
         self.receptive_field = (kernel_size - 1) * dilation + 1
         padding = self.receptive_field // 2
         self.conv = nn.Conv1d(
@@ -31,7 +32,7 @@ class SamePadConv(nn.Module):
         self.n_chunks = in_channels
         self.chunk_in_d = self.dim // self.n_chunks
         self.chunk_out_d = int(in_channels*kernel_size// self.n_chunks)
-        self.grads = torch.Tensor(sum(self.grad_dim)).fill_(0).cuda()
+        self.grads = torch.Tensor(sum(self.grad_dim)).fill_(0).to(self.device)  # ✅ 使用device
         nh=64
         self.controller = nn.Sequential(nn.Linear(self.chunk_in_d, nh), nn.SiLU())
         self.calib_w = nn.Linear(nh, self.chunk_out_d)
@@ -78,7 +79,9 @@ class SamePadConv(nn.Module):
         try:
             conv_out = F.conv1d(x, cw, padding=self.padding, dilation=self.dilation, bias = self.bias * b)
             out = f * conv_out
-        except: pdb.set_trace()
+        except Exception as e:
+            print(f'Warning: Exception in dev.py SamePadConv forward: {e}')
+            raise
         return out
 
     def representation(self, x):
@@ -94,10 +97,11 @@ class SamePadConv(nn.Module):
         return out
     
 class ConvBlock(nn.Module):
-    def __init__(self, in_channels, out_channels, kernel_size, dilation, final=False, gamma=0.9):
+    def __init__(self, in_channels, out_channels, kernel_size, dilation, final=False, gamma=0.9, device=None):
         super().__init__()
-        self.conv1 = SamePadConv(in_channels, out_channels, kernel_size, dilation=dilation, gamma=gamma)
-        self.conv2 = SamePadConv(out_channels, out_channels, kernel_size, dilation=dilation, gamma=gamma)
+        self.device = device if device is not None else torch.device('cpu')  # ✅ 添加设备管理
+        self.conv1 = SamePadConv(in_channels, out_channels, kernel_size, dilation=dilation, gamma=gamma, device=self.device)
+        self.conv2 = SamePadConv(out_channels, out_channels, kernel_size, dilation=dilation, gamma=gamma, device=self.device)
         self.projector = nn.Conv1d(in_channels, out_channels, 1) if in_channels != out_channels or final else None
     
     def ctrl_params(self):  
@@ -119,15 +123,16 @@ class ConvBlock(nn.Module):
         return x + residual
 
 class DilatedConvEncoder(nn.Module):
-    def __init__(self, in_channels, channels, kernel_size, gamma=0.9):
+    def __init__(self, in_channels, channels, kernel_size, gamma=0.9, device=None):
         super().__init__()
+        self.device = device if device is not None else torch.device('cpu')  # ✅ 添加设备管理
         self.net = nn.Sequential(*[
             ConvBlock(
                 channels[i-1] if i > 0 else in_channels,
                 channels[i],
                 kernel_size=kernel_size,
                 dilation=2**i,
-                final=(i == len(channels)-1), gamma=gamma
+                final=(i == len(channels)-1), gamma=gamma, device=self.device
             )
             for i in range(len(channels))
         ])
