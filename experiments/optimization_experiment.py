@@ -11,8 +11,8 @@ import torch
 from argparse import Namespace
 from datetime import datetime
 
-# 添加路径
-sys.path.append('fsnet')
+# 添加项目根目录到 Python 路径
+sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 
 # 导入实验类（使用别名区分）
 from exp.exp_nomem import Exp_TS2VecSupervised as Exp_NoMem

@@ -1,9 +1,11 @@
 """
-FSNet-v3 训练脚本
-通过 monkey-patch 替换编码器为 v3 语义对齐版本
+FSNet-Ultra 训练脚本
+通过 monkey-patch 替换编码器为 Ultra 版本
 """
-import sys, os
-sys.path.insert(0, os.path.join(os.path.dirname(__file__)))
+import sys
+import os
+# 添加项目根目录到 Python 路径
+sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 
 import time
 import json
@@ -11,13 +13,13 @@ import numpy as np
 import argparse
 from datetime import datetime
 
-# ─── Monkey-patch: v3 替换 ───
-from models.ts2vec import fsnet_v3
+# ─── Monkey-patch: Ultra 替换 ───
+from models.ts2vec import fsnet_ultra
 from models.ts2vec import fsnet_ as original_fsnet
 
-original_fsnet.DilatedConvEncoder = fsnet_v3.DilatedConvEncoderV3
-original_fsnet.SamePadConv = fsnet_v3.SamePadConvV3
-print("✅ Monkey-patch → FSNet-v3 (语义对齐: 全参数调制 + 通道分组Memory + 反向温度)")
+original_fsnet.DilatedConvEncoder = fsnet_ultra.DilatedConvEncoderUltra
+original_fsnet.SamePadConv = fsnet_ultra.SamePadConvUltra
+print("✅ Monkey-patch → FSNet-Ultra (Multi-Head Memory + Gated Controller)")
 
 from exp.exp_fsnet import Exp_TS2VecSupervised
 
@@ -59,8 +61,8 @@ def get_args():
     # 其他
     parser.add_argument('--use_gpu', action='store_true', default=False)
     parser.add_argument('--gpu', type=int, default=0)
-    parser.add_argument('--checkpoints', type=str, default='./fsnet/checkpoints/fsnet_v3/')
-    parser.add_argument('--des', type=str, default='v3')
+    parser.add_argument('--checkpoints', type=str, default='./fsnet/checkpoints/fsnet_ultra/')
+    parser.add_argument('--des', type=str, default='ultra')
 
     args = parser.parse_args([])
     args.use_gpu = False
@@ -76,8 +78,8 @@ def get_args():
 
 def main():
     print("=" * 80)
-    print("  FSNet-v3 — 语义对齐架构")
-    print("  6项修正: 全参数调制 | 通道分组Memory | 反向温度 | GradNorm-Gate | tanh限幅 | 单步EMA")
+    print("  FSNet-Ultra — 第二轮深度创新训练")
+    print("  6项新创新: 多头Memory | 门控Controller | M=64 | 梯度二阶矩 | 自适应阈值 | 多样性罚")
     print("=" * 80)
 
     args = get_args()
@@ -87,14 +89,14 @@ def main():
     exp = Exp_TS2VecSupervised(args)
 
     # ─── 训练 ───
-    print("\n[v3] 开始训练...")
+    print("\n[Ultra] 开始训练...")
     t0 = time.time()
     exp.train(setting)
     train_time = time.time() - t0
-    print(f"[v3] 训练完成: {train_time:.1f}s")
+    print(f"[Ultra] 训练完成: {train_time:.1f}s")
 
     # ─── 测试 (含在线学习) ───
-    print("\n[v3] 开始测试 (含在线学习)...")
+    print("\n[Ultra] 开始测试...")
     t1 = time.time()
     metrics, mae_arr, mse_arr, preds, trues = exp.test(setting)
     test_time = time.time() - t1
@@ -102,7 +104,7 @@ def main():
     mae, mse, rmse, mape, mspe, _ = metrics
 
     print(f"\n{'=' * 60}")
-    print(f"  FSNet-v3 测试结果:")
+    print(f"  FSNet-Ultra 测试结果:")
     print(f"    MSE  : {mse:.6f}")
     print(f"    MAE  : {mae:.6f}")
     print(f"    RMSE : {rmse:.6f}")
@@ -112,8 +114,8 @@ def main():
 
     # ─── 保存结果 ───
     result = {
-        'FSNet-v3': {
-            'method': 'FSNet-v3',
+        'FSNet-Ultra': {
+            'method': 'FSNet-Ultra',
             'mse': float(mse),
             'mae': float(mae),
             'rmse': float(rmse),

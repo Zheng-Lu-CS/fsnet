@@ -2,22 +2,28 @@
 快速可视化：NoMem vs FSNet (原始版本 vs 修复版本分析)
 """
 import os
+import sys
 import json
 import numpy as np
 import matplotlib.pyplot as plt
 import matplotlib
+
+# 获取项目根目录
+ROOT_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+sys.path.insert(0, ROOT_DIR)
+
 matplotlib.rcParams['font.sans-serif'] = ['SimHei', 'DejaVu Sans']
 matplotlib.rcParams['axes.unicode_minus'] = False
 
 # 读取ablation结果
-with open('results/ablation/ablation_results.json', 'r', encoding='utf-8') as f:
+with open(os.path.join(ROOT_DIR, 'results/ablation/ablation_results.json'), 'r', encoding='utf-8') as f:
     ablation_data = json.load(f)
 
 nomem = ablation_data['NoMem']['metrics']
 fsnet_original = ablation_data['FSNet']['metrics']
 
 # 创建输出目录
-output_dir = 'figures/optimization/'
+output_dir = os.path.join(ROOT_DIR, 'figures/optimization/')
 os.makedirs(output_dir, exist_ok=True)
 
 print("\n" + "="*80)

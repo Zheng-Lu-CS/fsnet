@@ -5,11 +5,16 @@
 """
 
 import os
+import sys
 import json
 import numpy as np
 import matplotlib.pyplot as plt
 import matplotlib
 from matplotlib.patches import Rectangle
+
+# 获取项目根目录
+ROOT_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+sys.path.insert(0, ROOT_DIR)
 
 # 配置中文字体（Windows系统）
 matplotlib.rcParams['font.sans-serif'] = ['Microsoft YaHei', 'SimHei']
@@ -20,9 +25,9 @@ print("可视化分析 - 生成论文级别图表")
 print("="*70)
 
 # 加载实验结果
-result_dir = './results/ablation/'
-json_path = f"{result_dir}ablation_results.json"
-np_path = f"{result_dir}ablation_predictions.npz"
+result_dir = os.path.join(ROOT_DIR, 'results/ablation/')
+json_path = os.path.join(result_dir, 'ablation_results.json')
+np_path = os.path.join(result_dir, 'ablation_predictions.npz')
 
 if not os.path.exists(json_path):
     print(f"❌ 错误: 找不到实验结果文件 {json_path}")
@@ -40,7 +45,7 @@ print(f"   方法数量: {len(results)}")
 print(f"   预测数组: {list(predictions.keys())}")
 
 # 创建输出目录
-fig_dir = './figures/'
+fig_dir = os.path.join(ROOT_DIR, 'figures/')
 os.makedirs(fig_dir, exist_ok=True)
 
 # 颜色方案

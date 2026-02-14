@@ -2,18 +2,25 @@
 FSNet-Ultra vs FSNet-Advanced 全面对比可视化
 7 模型排名 + Ultra 突破性分析
 """
-import os, json
+import os
+import sys
+import json
 import numpy as np
 import matplotlib.pyplot as plt
 import matplotlib
+
+# 获取项目根目录
+ROOT_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+sys.path.insert(0, ROOT_DIR)
+
 matplotlib.rcParams['font.sans-serif'] = ['SimHei', 'DejaVu Sans']
 matplotlib.rcParams['axes.unicode_minus'] = False
 
-out = 'figures/ultra/'
+out = os.path.join(ROOT_DIR, 'figures/ultra/')
 os.makedirs(out, exist_ok=True)
 
 # ── 加载数据 ──
-with open('results/comprehensive/comprehensive_results.json', 'r', encoding='utf-8') as f:
+with open(os.path.join(ROOT_DIR, 'results/comprehensive/comprehensive_results.json'), 'r', encoding='utf-8') as f:
     comp = json.load(f)
 
 data = {}

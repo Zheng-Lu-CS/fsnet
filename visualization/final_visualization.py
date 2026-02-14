@@ -3,11 +3,17 @@ FSNet 全面对比可视化 (含 FSNet-Advanced 创新模型)
 生成10张专业图表，覆盖所有6种方法的完整对比
 """
 import os
+import sys
 import json
 import numpy as np
 import matplotlib.pyplot as plt
 import matplotlib.patches as mpatches
 import matplotlib
+
+# 获取项目根目录
+ROOT_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+sys.path.insert(0, ROOT_DIR)
+
 matplotlib.rcParams['font.sans-serif'] = ['SimHei', 'DejaVu Sans']
 matplotlib.rcParams['axes.unicode_minus'] = False
 
@@ -16,11 +22,11 @@ try:
 except:
     plt.style.use('default')
 
-output_dir = 'figures/comprehensive/'
+output_dir = os.path.join(ROOT_DIR, 'figures/comprehensive/')
 os.makedirs(output_dir, exist_ok=True)
 
 # ===================== 加载所有数据 =====================
-with open('results/comprehensive/comprehensive_results.json', 'r', encoding='utf-8') as f:
+with open(os.path.join(ROOT_DIR, 'results/comprehensive/comprehensive_results.json'), 'r', encoding='utf-8') as f:
     comp = json.load(f)
 
 # 统一数据结构: {method_name: {MSE, MAE, RMSE, MAPE, MSPE, total_time, ...}}

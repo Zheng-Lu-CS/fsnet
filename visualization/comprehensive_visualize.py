@@ -2,22 +2,28 @@
 全面对比可视化：NoMem vs FSNet原始 vs FSNet-Fixed
 """
 import os
+import sys
 import json
 import numpy as np
 import matplotlib.pyplot as plt
 import matplotlib
+
+# 获取项目根目录
+ROOT_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+sys.path.insert(0, ROOT_DIR)
+
 matplotlib.rcParams['font.sans-serif'] = ['SimHei', 'DejaVu Sans']
 matplotlib.rcParams['axes.unicode_minus'] = False
 
-output_dir = 'figures/comprehensive/'
+output_dir = os.path.join(ROOT_DIR, 'figures/comprehensive/')
 os.makedirs(output_dir, exist_ok=True)
 
 # 加载之前的消融实验结果
-with open('results/ablation/ablation_results.json', 'r', encoding='utf-8') as f:
+with open(os.path.join(ROOT_DIR, 'results/ablation/ablation_results.json'), 'r', encoding='utf-8') as f:
     ablation = json.load(f)
 
 # 加载综合对比结果
-comp_file = 'results/comprehensive/comprehensive_results.json'
+comp_file = os.path.join(ROOT_DIR, 'results/comprehensive/comprehensive_results.json')
 if os.path.exists(comp_file):
     with open(comp_file, 'r', encoding='utf-8') as f:
         comp = json.load(f)

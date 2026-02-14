@@ -287,9 +287,10 @@ python fsnet/visualize_v3.py            # v3 8张图
 ```bibtex
 @misc{fsnet_optimization_2026,
   title={FSNet Bug Fix and Architecture Optimization},
-  author={Your Name},
+  author={Zheng Lu},
   year={2026},
-  howpublished={\url{https://github.com/yourusername/fsnet-optimization}}
+  institution={University of Electronic Science and Technology of China},
+  howpublished={\url{https://github.com/luzheng/fsnet-optimization}}
 }
 ```
 
@@ -305,10 +306,11 @@ python fsnet/visualize_v3.py            # v3 8张图
 
 ## 📧 联系方式
 
-- **作者**：[你的名字]
-- **机构**：[机构名称]
-- **邮箱**：[your.email@example.com]
-- **个人主页**：[https://yourwebsite.com]
+- **作者**：鲁铮 (Zheng Lu)
+- **机构**：电子科技大学 (University of Electronic Science and Technology of China)
+- **年级**：大一
+- **邮箱**：2025070903015@std.uestc.edu.cn
+- **ORCID**：[0009-0000-7157-742X](https://orcid.org/0009-0000-7157-742X)
 
 ---
 
@@ -322,6 +324,6 @@ python fsnet/visualize_v3.py            # v3 8张图
 
 **⭐ 如果这个项目对你有帮助，请给个Star！ ⭐**
 
-Made with ❤️ by [Your Name]
+Made with ❤️ by Zheng Lu @ UESTC
 
 </div>

@@ -3,10 +3,16 @@ FSNet优化结果可视化
 对比NoMem与修复Bug后的FSNet性能
 """
 import os
+import sys
 import json
 import numpy as np
 import matplotlib.pyplot as plt
 import matplotlib
+
+# 获取项目根目录
+ROOT_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+sys.path.insert(0, ROOT_DIR)
+
 matplotlib.rcParams['font.sans-serif'] = ['SimHei', 'DejaVu Sans']
 matplotlib.rcParams['axes.unicode_minus'] = False
 
@@ -20,7 +26,7 @@ plt.rcParams['grid.alpha'] = 0.3
 
 def load_results():
     """加载实验结果"""
-    results_file = 'results/optimization/optimization_results.json'
+    results_file = os.path.join(ROOT_DIR, 'results/optimization/optimization_results.json')
     
     if not os.path.exists(results_file):
         print(f"错误: 找不到结果文件 {results_file}")
