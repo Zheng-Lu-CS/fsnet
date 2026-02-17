@@ -218,7 +218,7 @@ python fsnet/visualize_v3.py            # v3 8张图
 
 </div>
 
----
+<!-- ---
 
 ## � 文档导航
 
@@ -230,7 +230,7 @@ python fsnet/visualize_v3.py            # v3 8张图
 | [EXPERIMENT_REPORT.md](EXPERIMENT_REPORT.md) | 完整实验报告 |
 | [OPTIMIZATION_REPORT.md](OPTIMIZATION_REPORT.md) | Bug修复与优化说明 |
 
----
+--- -->
 
 ## 🎓 研究价值
 
