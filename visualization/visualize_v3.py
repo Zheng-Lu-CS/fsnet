@@ -1,5 +1,5 @@
 """
-FSNet-v3 可视�? 8图全面对比分�?
+FSNet-v3 可视�? 8图全面对比分�?
 """
 import os
 import sys
@@ -9,7 +9,7 @@ import matplotlib
 matplotlib.use('Agg')
 import matplotlib.pyplot as plt
 
-# 获取项目根目�?
+# 获取项目根目�?
 ROOT_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 sys.path.insert(0, ROOT_DIR)
 
@@ -41,7 +41,7 @@ for name in order:
         mses.append(results[name]['mse'])
         maes.append(results[name]['mae'])
 
-# ─── �?: MAPE全排�?(8模型) ───
+# ─── �?: MAPE全排�?(8模型) ───
 fig, ax = plt.subplots(figsize=(12, 6))
 colors = ['#d32f2f' if n == 'FSNet-v3' else '#1976d2' if n == 'FSNet-Ultra' 
           else '#388e3c' if n == 'FSNet-Advanced' else '#78909c' for n in models]
@@ -53,16 +53,16 @@ for i, (bar, v) in enumerate(zip(bars, mapes)):
 ax.set_xticks(range(len(models)))
 ax.set_xticklabels(models, rotation=25, ha='right')
 ax.set_ylabel('MAPE (%)')
-ax.set_title('Full Model Ranking �?MAPE (8 Models on ETTh1)')
+ax.set_title('Full Model Ranking �?MAPE (8 Models on ETTh1)')
 ax.annotate('NEW SOTA', xy=(len(models)-1, mapes[-1]), xytext=(len(models)-2.5, mapes[-1]+2),
             arrowprops=dict(arrowstyle='->', color='#d32f2f', lw=2),
             fontsize=14, fontweight='bold', color='#d32f2f')
 plt.tight_layout()
 plt.savefig(os.path.join(OUTPUT_DIR, '1_v3_mape_ranking.png', bbox_inches='tight')
 plt.close()
-print("�?1_v3_mape_ranking.png")
+print("�?1_v3_mape_ranking.png")
 
-# ─── �?: v3 vs Ultra vs Advanced 三代对比 ───
+# ─── �?: v3 vs Ultra vs Advanced 三代对比 ───
 fig, axes = plt.subplots(1, 3, figsize=(14, 5))
 labels = ['Advanced', 'Ultra', 'v3']
 vals_mape = [results['FSNet-Advanced']['mape'], results['FSNet-Ultra']['mape'], results['FSNet-v3']['mape']]
@@ -84,9 +84,9 @@ fig.suptitle('Three Generations Head-to-Head', fontsize=14, fontweight='bold', y
 plt.tight_layout()
 plt.savefig(os.path.join(OUTPUT_DIR, '2_v3_three_generations.png', bbox_inches='tight')
 plt.close()
-print("�?2_v3_three_generations.png")
+print("�?2_v3_three_generations.png")
 
-# ─── �?: v3 相对各方法改�?───
+# ─── �?: v3 相对各方法改�?───
 fig, ax = plt.subplots(figsize=(10, 6))
 v3_mape = results['FSNet-v3']['mape']
 baselines = ['OGD', 'ER', 'NoMem', 'FSNet', 'FSNet-Fixed', 'FSNet-Advanced', 'FSNet-Ultra']
@@ -109,9 +109,9 @@ ax.axvline(x=0, color='black', linewidth=0.5)
 plt.tight_layout()
 plt.savefig(os.path.join(OUTPUT_DIR, '3_v3_improvement.png', bbox_inches='tight')
 plt.close()
-print("�?3_v3_improvement.png")
+print("�?3_v3_improvement.png")
 
-# ─── �?: MSE+MAE 双面�?(8模型) ───
+# ─── �?: MSE+MAE 双面�?(8模型) ───
 fig, (ax1, ax2) = plt.subplots(1, 2, figsize=(14, 5))
 x = range(len(models))
 colors8 = ['#d32f2f' if n == 'FSNet-v3' else '#1976d2' if n == 'FSNet-Ultra' 
@@ -136,9 +136,9 @@ ax2.set_ylabel('MAE')
 plt.tight_layout()
 plt.savefig(os.path.join(OUTPUT_DIR, '4_v3_mse_mae.png', bbox_inches='tight')
 plt.close()
-print("�?4_v3_mse_mae.png")
+print("�?4_v3_mse_mae.png")
 
-# ─── �?: 性能演进曲线 (4阶段) ───
+# ─── �?: 性能演进曲线 (4阶段) ───
 fig, ax = plt.subplots(figsize=(10, 6))
 evolution = [
     ('OGD\n(Baseline)', 14.75),
@@ -168,15 +168,15 @@ ax.fill_between(x, vals, alpha=0.1, color='#1976d2')
 plt.tight_layout()
 plt.savefig(os.path.join(OUTPUT_DIR, '5_v3_evolution.png', bbox_inches='tight')
 plt.close()
-print("�?5_v3_evolution.png")
+print("�?5_v3_evolution.png")
 
-# ─── �?: 雷达�?(4模型) ───
+# ─── �?: 雷达�?(4模型) ───
 fig, ax = plt.subplots(figsize=(8, 8), subplot_kw=dict(polar=True))
 categories = ['1/MAPE', '1/MSE', '1/MAE', '1/RMSE']
 selected = ['OGD', 'FSNet-Advanced', 'FSNet-Ultra', 'FSNet-v3']
 radar_colors = ['#9e9e9e', '#388e3c', '#1976d2', '#d32f2f']
 
-# 归一�?(1/metric, 相对OGD)
+# 归一�?(1/metric, 相对OGD)
 ogd = results['OGD']
 angles = np.linspace(0, 2*np.pi, len(categories), endpoint=False).tolist()
 angles += angles[:1]
@@ -195,14 +195,14 @@ for name, color in zip(selected, radar_colors):
 
 ax.set_xticks(angles[:-1])
 ax.set_xticklabels(categories, fontsize=11)
-ax.set_title('Radar Chart �?Relative Performance (vs OGD=1.0)', fontsize=13, fontweight='bold', pad=20)
+ax.set_title('Radar Chart �?Relative Performance (vs OGD=1.0)', fontsize=13, fontweight='bold', pad=20)
 ax.legend(loc='upper right', bbox_to_anchor=(1.25, 1.1))
 plt.tight_layout()
 plt.savefig(os.path.join(OUTPUT_DIR, '6_v3_radar.png', bbox_inches='tight')
 plt.close()
-print("�?6_v3_radar.png")
+print("�?6_v3_radar.png")
 
-# ─── �?: 创新对比�?(Advanced vs Ultra vs v3) ───
+# ─── �?: 创新对比�?(Advanced vs Ultra vs v3) ───
 fig, ax = plt.subplots(figsize=(14, 8))
 ax.axis('off')
 
@@ -237,13 +237,13 @@ for i in range(len(rows)):
             cell.set_facecolor('#e8f5e9' if j == 3 else '#f5f5f5')
             cell.set_text_props(fontweight='bold')
 
-ax.set_title('Architecture Innovation Comparison �?Three Generations', 
+ax.set_title('Architecture Innovation Comparison �?Three Generations', 
              fontsize=14, fontweight='bold', pad=20)
 plt.savefig(os.path.join(OUTPUT_DIR, '7_v3_innovation_table.png', bbox_inches='tight')
 plt.close()
-print("�?7_v3_innovation_table.png")
+print("�?7_v3_innovation_table.png")
 
-# ─── �?: 最终排行榜 ───
+# ─── �?: 最终排行榜 ───
 fig, ax = plt.subplots(figsize=(12, 6))
 ax.axis('off')
 
@@ -252,7 +252,7 @@ rows_lb = []
 sorted_results = sorted(results.items(), key=lambda x: x[1]['mape'])
 ogd_mape = results['OGD']['mape']
 for i, (name, data) in enumerate(sorted_results, 1):
-    imp = f"-{(1 - data['mape']/ogd_mape)*100:.1f}%" if name != 'OGD' else '�?
+    imp = f"-{(1 - data['mape']/ogd_mape)*100:.1f}%" if name != 'OGD' else '�?
     rows_lb.append([
         f'#{i}', name, f"{data['mape']:.2f}", f"{data['mse']:.6f}",
         f"{data['mae']:.6f}", imp, f"{data['total_time']:.0f}"
@@ -272,11 +272,11 @@ for j in range(7):
     table[1, j].set_facecolor('#fff9c4')
     table[1, j].set_text_props(fontweight='bold')
 
-ax.set_title('Final Leaderboard �?8 Models on ETTh1 (features=S, 2 epochs)',
+ax.set_title('Final Leaderboard �?8 Models on ETTh1 (features=S, 2 epochs)',
              fontsize=14, fontweight='bold', pad=20)
 plt.savefig(os.path.join(OUTPUT_DIR, '8_v3_leaderboard.png', bbox_inches='tight')
 plt.close()
-print("�?8_v3_leaderboard.png")
+print("�?8_v3_leaderboard.png")
 
 print("\n" + "="*60)
 print("  全部 8 张可视化已生成到 figures/v3/")

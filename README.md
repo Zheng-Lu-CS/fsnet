@@ -201,23 +201,20 @@ python fsnet/visualize_v3.py            # v3 8张图
 
 ### MAPE全模型对比  |  改进瀑布图
 
-<img src="figures/comprehensive/1_mape_all.png" width="45%"> <img src="figures/comprehensive/7_advanced_improvement.png" width="45%">
+<img src="figures/v3/1_v3_mape_ranking.png" width="45%"> 
 
 ### 性能-效率 Pareto图  |  雷达图
 
-<img src="figures/comprehensive/8_pareto.png" width="45%"> <img src="figures/comprehensive/4_radar.png" width="45%">
+<img src="figures/comprehensive/8_pareto.png" width="45%"> <img src="figures/v3/6_v3_radar.png" width="45%">
 
-### 架构演进路线图
-
-<img src="figures/comprehensive/10_full_roadmap.png" width="90%">
 
 ### v3 三代对比  |  v3 性能演进
 
 <img src="figures/v3/2_v3_three_generations.png" width="45%"> <img src="figures/v3/5_v3_evolution.png" width="45%">
 
-### v3 全模型排名  |  v3 雷达图
+<!-- ### v3 全模型排名  |  v3 雷达图
 
-<img src="figures/v3/1_v3_mape_ranking.png" width="45%"> <img src="figures/v3/6_v3_radar.png" width="45%">
+<img src="figures/v3/1_v3_mape_ranking.png" width="45%"> <img src="figures/v3/6_v3_radar.png" width="45%"> -->
 
 </div>
 
