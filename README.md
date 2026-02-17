@@ -201,7 +201,7 @@ python fsnet/visualize_v3.py            # v3 8张图
 
 ### MAPE全模型对比  |  改进瀑布图
 
-<img src="figures/v3/1_v3_mape_ranking.png" width="45%"> 
+<img src="figures/v3/1_v3_mape_ranking.png" width="90%"> 
 
 ### 性能-效率 Pareto图  |  雷达图
 
