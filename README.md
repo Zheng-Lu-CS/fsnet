@@ -212,9 +212,9 @@ python fsnet/visualize_v3.py            # v3 8张图
 
 <img src="figures/v3/2_v3_three_generations.png" width="45%"> <img src="figures/v3/5_v3_evolution.png" width="45%">
 
-<!-- ### v3 全模型排名  |  v3 雷达图
+### 改进模型演变  |  全模型性能对比
 
-<img src="figures/v3/1_v3_mape_ranking.png" width="45%"> <img src="figures/v3/6_v3_radar.png" width="45%"> -->
+<img src="figures/v3/7_v3_innovation_table.png" width="45%"> <img src="figures/v3/8_v3_leaderboard.png" width="45%">
 
 </div>
 
